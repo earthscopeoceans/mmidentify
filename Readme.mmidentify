@@ -1,0 +1,115 @@
+Program mmidentify
+
+Program to match triggered events in Mermaid SAC records with
+earthquakes in the catalogue obtained from IRIS
+
+Run this program after runnning automaid, from directory processed/
+
+SAC files with proper headings (and zero time defined as the
+origin time) are written to [root_directory]/identified for those
+records that can be associated with the arrival of a P, S, pP, PP or 
+PKP wave. 
+It writes a script move2ident that  can move  the files created by
+automaid (*.sac, *.mseed, *.png, *.html) to [root_directory]/identified
+or [root_directory]/unidentified, depending on the result of the
+identification.
+
+To install this software:
+[1] Untar the mmidentify.tar file
+[2] Edit the line: root_directory = '/Users/guust/data/Mermaids/SPPIM/'
+    and replace it with your own target directory (should end in '/')
+[3] Move scripts rdeventcat and mksaclst to directory ~/bin
+[4] Install the Seismic Analysis Code (SAC) from IRIS (see
+    https://ds.iris.edu/ds/nodes/dmc/software/downloads/sac/) if you
+    do not yet have that.
+[5] Install FetchEvent (from http://service.iris.edu/clients/)
+[6] Edit compile.mmidentify to reflect the location of sacio.a
+[7] Run script compile.mmidentify to compile (it uses gfortran)
+
+If you downloaded automaid from GitHub you should have a parent directory 
+(say automaid_V1.1/, but I'll call it Parent) that has at least
+the subdirectories processed/ server/ and scripts/.
+
+To process new data, first download new data from the server
+
+If you do something like:
+> scp eso@mermaid.unice.fr:\{"*.LOG","*.MER","*.vit"\} .
+it will download ALL data transmitted. To avoid that, I wrote
+a little script <mktar4scp> that creates a tar file <latest.tar.gz>.
+Install this(*) on the remote server, and run it from there, e.g.:
+> ./mktar4scp 7
+creates a tar file with the files added in the last 7 days. If you
+forget when it was run last, check file <lastmktar> which has the
+date of the last run (or simply check the date of the last tar file)
+Now you can do (from the Parent directory):
+> scp eso@mermaid.unice.fr:latest.tar.gz .
+> tar -xvf latest.tar.gz
+
+Still from the parent directory, run automaid:
+> source activate pymaid
+> python scripts/main.py
+> source deactivate
+
+Now run mmidentify
+> cd processed/
+> mmidentify
+
+You may wish to inspect the script move2ident before running it. But
+if all seems OK:
+> move2ident
+
+This last command will clean up the processed/ and server/ directories.
+Files are moved to new directories under the Parent directory. The
+contents of server/ is placed in a directory server.date (e.g. server.20180807/)
+and *kml and *html files from the processed/ directory that were not moved to 
+the root_directory/(un)identified can be found in directories named
+processed.float/date, e.g. processed.452.020-P-06/20180807/
+
+If all went well, you should find your data in the root_directory
+under either identified or unidentified. For example,
+an ls on
+/Users/guust/data/Mermaids/SPPIM/unidentified/2018.199.22XX/ gave:
+06_5B4C1DC5.LOG.06_5B5013BC.MER.env
+06_5B4C1DC5.LOG.h
+06_5B4C1DC5.html
+20180718T224522.06_5B5013BC.MER.DET.WLT5.html
+20180718T224522.06_5B5013BC.MER.DET.WLT5.mseed
+20180718T224522.06_5B5013BC.MER.DET.WLT5.png
+20180718T224522.06_5B5013BC.MER.DET.WLT5.sac
+
+While an ls on
+/Users/guust/data/Mermaids/SPPIM/identified/2018.194.0946/sac/ gave:
+MH06.sac        MH07.sac        quake
+(the file <quake> is used with the Globalseis inversion programs)
+
+Similarly, on
+/Users/guust/data/Mermaids/SPPIM/identified/2018.194.0946/mseed you find:
+MH06.mseed      MH07.mseed
+
+and finally in 
+/Users/guust/data/Mermaids/SPPIM/identified/2018.194.0946/other/ I found:
+06_5B4748EA.LOG.06_5B4C1D4F.MER.env
+06_5B4748EA.LOG.h
+06_5B4748EA.html
+07_5B4748A2.LOG.07_5B4C1F90.MER.env
+07_5B4748A2.LOG.h
+07_5B4748A2.html
+20180713T094803.06_5B4C1D4F.MER.DET.WLT5.html
+20180713T094803.06_5B4C1D4F.MER.DET.WLT5.png
+20180713T094803.06_5B4C1D4F.MER.DET.WLT5.sac
+20180713T094833.07_5B4C1F90.MER.DET.WLT5.html
+20180713T094833.07_5B4C1F90.MER.DET.WLT5.png
+20180713T094833.07_5B4C1F90.MER.DET.WLT5.sac
+20180713T170508.07_5B4C1F90.MER.DET.WLT5.html
+20180715T224815.06_5B4C1D4F.MER.DET.WLT5.html
+20180715T224817.07_5B4C1F90.MER.DET.WLT5.html
+
+The difference between the *sac files under sac/ and other/ is that
+the former has all the header information adapted to the identified
+earthquake and its zero time is now defined as the origin time. The
+sac file in other/ is the original, unchanged sac file created by automaid.
+
+(*) Note: mktar4scp uses a simple script <getlogs>. The reason getlogs
+is not simply incorporated in mktar4scp was that I could not find another
+way to redirect the output of the find command, since >> after find (in the 
+script itself) does not seem to work. So install getlogs as well!
