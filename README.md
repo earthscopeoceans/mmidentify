@@ -1,4 +1,4 @@
 # mmidentify
-Matches triggered events in MERMAID SAC records with earthquakes in the catalogue obtained from IRIS.
+Matches triggered events in Mermaid SAC files with earthquakes in the IRIS catalogue. 
 
 Written by Guust Nolet.
