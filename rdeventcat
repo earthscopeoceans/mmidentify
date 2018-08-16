@@ -1,0 +1,53 @@
+#! /bin/csh
+
+# Reads output from FetchEvent and creates a format more easily readable
+# with fortran
+
+# Needs FetchEvent from http://service.iris.edu/clients/
+
+if($#argv<2) then
+  echo "Usage: rdeventcat startdate enddate [minimum_mag]"
+  echo "E.g. rdeventcat 2018-06-30 2018-07-30 2.5"
+  echo "If minimum_mag is absent, all magnituded will be reported"
+  exit
+endif  
+
+# Get events from IRIS
+if($#argv>2) then
+  set maxm = $argv[3]
+  FetchEvent -s $argv[1] -e $argv[2] --mag ${maxm}:9 -o dumfe
+else
+  FetchEvent -s $argv[1] -e $argv[2] -o dumfe
+endif
+
+# Filter for needed parameters, separate output by |
+awk -F"|" '{printf "%s| %9.4f| %10.4f| %6.1f| %s| %s\n", $2,$3,$4,$5,$9,$10}' dumfe > dumc
+
+# Isolate numbers in the magnitude section
+echo "s/ [A-z][A-z]_[A-z][A-z],//" > sedcmds
+echo "s/ [A-z][A-z][A-z][A-z],//" > sedcmds
+echo "s/ [A-z][A-z][A-z],//" >> sedcmds
+echo "s/ [A-z][A-z],//" >> sedcmds
+echo "s/,[A-z][A-z][A-z][A-z]|/|/" >> sedcmds
+echo "s/,[A-z][A-z][A-z]|/|/" >> sedcmds
+echo "s/,[A-z][A-z]|/|/" >> sedcmds
+echo "s/,//g" >> sedcmds
+sed -f sedcmds dumc > dumcc
+
+# Now we can also isolate the magnitude:
+awk -F"|" '{printf "%s %9.4f %10.4f %6.1f %6.1f %s\n", $1,$2,$3,$4,$5,$6}' dumcc > eventlist
+
+set a = `wc eventlist`
+echo $a[1] events found, see file eventlist
+
+awk '{if($6>5.99) print}' eventlist > eventlist60
+touch eventlist60
+set a = `wc eventlist60`
+echo $a[1] events found with magnitude 6.0 and higher, see file eventlist60
+
+awk '{if($6>5.0 && $5>34.9) print}' eventlist > eventlistdp
+touch eventlistdp
+set a = `wc eventlistdp`
+echo $a[1] strong events found with depth 35 km and higher, see file eventlistdp
+
+# rm dumfe dumc
