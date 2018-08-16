@@ -1,0 +1,24 @@
+#! /bin/csh -x
+
+# this script generates a tar file with the latest
+# *.LOG, *.MER and *.vit files for scp to your local server
+# The resulting tar file is called latest.tar
+# Usage: mktar4scp days
+# where days is the age of the oldest files that will be copied
+
+if($#argv<1) then
+  echo 'Usage: mktar4scp days'
+  exit
+endif
+echo 'tar -cvf latest.tar' > dum
+getlogs $argv[1] >> dum
+sed -i -e 's/$/ \\/' dum
+chmod a+x dum
+./dum
+rm dum
+gzip latest.tar
+
+echo data are in file latest.tar.gz
+
+# save date of this run for later checks if needed:
+date > lastmktar
