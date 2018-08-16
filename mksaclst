@@ -1,0 +1,14 @@
+#! /bin/csh
+
+# script to make a list of SAC files to be read by mmidentify.f90
+# it is called by mmidentify run from direcory processed/
+
+ls */*s/*.sac > dumlstr
+awk -F"/" '{print $3}' dumlstr > dumlsts
+awk -F"." '{print $1}' dumlsts > dumlstt
+
+touch dumnr
+echo `wc dumlsts` > dumnr
+
+# list float directories:
+ls -d */ > dumflt
