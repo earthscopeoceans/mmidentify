@@ -1,0 +1,4 @@
+#! /bin/csh
+find . -maxdepth 1 -mtime -$argv[1] -name "*.MER"
+find . -maxdepth 1 -mtime -$argv[1] -name "*.LOG"
+find . -maxdepth 1 -mtime -$argv[1] -name "*.vit"
