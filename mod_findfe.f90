@@ -1,6 +1,6 @@
 module findfe
 
-! Finds Flynn-Engdahl number and returns a shortened version for SAC
+! Finds Flinn-Engdahl number and returns a shortened version for SAC
 !header
 
 implicit none
