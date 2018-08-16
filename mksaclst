@@ -1,6 +1,6 @@
 #! /bin/csh
 
-# script to make a list of SAC files to be read by mmidentify.f90
+# Script to make a list of SAC files to be read by mmidentify.f90
 # it is called by mmidentify run from direcory processed/
 
 ls */*s/*.sac > dumlstr
