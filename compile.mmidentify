@@ -1,3 +1,4 @@
+# Written by Guust Nolet
 gfortran -c mod_ttak135.f90
 gfortran -c mod_findfe.f90
 gfortran -o ~/bin/mmidentify mmidentify.f90 march1days.f90 delaz.f90 date2julian.f90 mod_ttak135.o mod_findfe.o /usr/local/sac/lib/sacio.a 
